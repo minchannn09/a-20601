@@ -94,28 +94,43 @@ st.info(
 st.divider()  # 구역 구분을 위한 구분선
 
 # --------------------------------------------------
-# [그래프 3] Top 5 영화 누적관객수 비교 (다중 선그래프)
+# [그래프 3] 조건 만족 영화 누적관객수 비교 (다중 선그래프)
 # --------------------------------------------------
-st.header("🏆 누적관객수 Top 5 영화 성과 비교")
+st.header("🏆 장기 흥행 Top 5 영화 누적관객수 비교")
 
-# 1. 누적관객수가 가장 높은 상위 5개 영화명 추출
-top5_movies = movie_list[:5]
+# 1. 영화별 차트(TOP10) 등장 일수 카운트
+movie_counts = df["영화명"].value_counts()
 
-# 2. 전체 데이터에서 Top 5 영화의 데이터만 추출
-top5_df = df[df["영화명"].isin(top5_movies)]
+# 2. 등장 일수가 20일 이상인 영화 목록 필터링
+movies_over_20days = movie_counts[movie_counts >= 20].index
 
-# 3. Plotly 다중 선그래프 생성 (color="영화명" 속성으로 영화별 다른 색상 및 범례 자동 적용)
+# 3. 조건(20일 이상)을 만족하는 데이터만 1차 필터링
+df_over_20days = df[df["영화명"].isin(movies_over_20days)]
+
+# 4. 필터링된 영화들 중 최고 누적관객수 기준으로 상위 5개 영화명 추출
+top5_long_run_movies = (
+    df_over_20days.groupby("영화명")["누적관객수"]
+    .max()
+    .sort_values(ascending=False)
+    .head(5)
+    .index.tolist()
+)
+
+# 5. 상위 5개 영화의 전체 데이터 추출
+top5_long_run_df = df[df["영화명"].isin(top5_long_run_movies)]
+
+# 6. Plotly 다중 선그래프 생성
 fig3 = px.line(
-    top5_df,
+    top5_long_run_df,
     x="기준일자",
     y="누적관객수",
-    color="영화명",  # 영화명에 따라 선 색상을 다르게 설정하고 범례 표시
-    title="상위 5개 영화의 기준일자별 누적관객수 추이 비교",
+    color="영화명",  # 영화별로 색상 구분 및 범례 생성
+    title="TOP10 20일 이상 진입 영화 중 누적관객수 상위 5개 영화 추이 비교",
     labels={"기준일자": "날짜", "누적관객수": "누적 관객수(명)", "영화명": "영화 제목"},
 )
 
 st.plotly_chart(fig3, use_container_width=True)
 
 st.info(
-    "💡 **이 그래프로 알 수 있는 것:** 가장 흥행한 상위 5개 영화의 관객수 증가 속도와 최종 누적관객수 규모를 한눈에 비교할 수 있습니다."
+    "💡 **이 그래프로 알 수 있는 것:** 박스오피스 상위권에 20일 이상 장기 집권한 흥행작들의 누적관객수 증가 추이와 장기 흥행 동력을 한눈에 비교할 수 있습니다."
 )
