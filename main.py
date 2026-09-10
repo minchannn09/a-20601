@@ -148,37 +148,34 @@ daily_total_df = (
     df.groupby("기준일자")["해당일관객수"].sum().reset_index()
 )
 
-# 2. 7일 이동평균 계산 (rolling(window=7).mean())
+# 2. 7일 이동평균 계산
 daily_total_df["7일이동평균"] = (
     daily_total_df["해당일관객수"].rolling(window=7).mean()
 )
 
-# 3. Plotly Graph Objects(go.Figure)를 이용해 원본 선과 이동평균 선 겹쳐 그리기
+# 3. Plotly Graph Objects를 이용한 차트 생성
 fig4 = go.Figure()
 
-# 원본 일별 관객수 합계 선 (연하게 / 반투명 색상 설정)
 fig4.add_trace(
     go.Scatter(
         x=daily_total_df["기준일자"],
         y=daily_total_df["해당일관객수"],
         mode="lines",
         name="일일 관객수 합계",
-        line=dict(color="rgba(150, 150, 150, 0.4)", width=1.5),  # 연한 회색
+        line=dict(color="rgba(150, 150, 150, 0.4)", width=1.5),
     )
 )
 
-# 7일 이동평균 선 (진하게)
 fig4.add_trace(
     go.Scatter(
         x=daily_total_df["기준일자"],
         y=daily_total_df["7일이동평균"],
         mode="lines",
         name="7일 이동평균",
-        line=dict(color="#FF4B4B", width=3),  # 진한 빨간색
+        line=dict(color="#FF4B4B", width=3),
     )
 )
 
-# 레이아웃 및 축 설정
 fig4.update_layout(
     title="전체 박스오피스 관객수 추이 및 7일 이동평균선",
     xaxis_title="날짜",
@@ -191,4 +188,39 @@ st.plotly_chart(fig4, use_container_width=True)
 
 st.info(
     "💡 **이 그래프로 알 수 있는 것:** 주말과 평일의 심한 일별 관객수 변동성(노이즈)을 제거하여, 전체 극장가 관객 시장의 전반적인 흐름과 계절적 성수기/비성수기 추세를 명확하게 파악할 수 있습니다."
+)
+
+st.divider()  # 구역 구분을 위한 구분선
+
+# --------------------------------------------------
+# [그래프 5] 월별 전체 관객수 합계 (막대그래프)
+# --------------------------------------------------
+st.header("🗓️ 월별 전체 관객수 합계")
+
+# 1. 기준일자에서 연-월(YYYY-MM) 문자열 추출
+daily_total_df["연월"] = daily_total_df["기준일자"].dt.strftime("%Y-%m")
+
+# 2. 월 단위로 묶어서 해당일관객수 합산
+monthly_total_df = (
+    daily_total_df.groupby("연월")["해당일관객수"].sum().reset_index()
+)
+
+# 3. Plotly 막대그래프 생성
+fig5 = px.bar(
+    monthly_total_df,
+    x="연월",
+    y="해당일관객수",
+    title="월별 극장가 총 관객수 비교",
+    labels={"연월": "연-월", "해당일관객수": "총 관객수(명)"},
+    text_auto=".2s",  # 막대 위에 축약된 숫자로 관객수 표시 (예: 1.2M)
+)
+
+fig5.update_traces(
+    textposition="outside"  # 텍스트 위치를 막대 외부 상단으로 설정
+)
+
+st.plotly_chart(fig5, use_container_width=True)
+
+st.info(
+    "💡 **이 그래프로 알 수 있는 것:** 월별 총 관객 수 규모를 비교하여 영화 시장의 월별 성수기(여름 방학, 명절 등)와 비성수기를 한눈에 직관적으로 파악할 수 있습니다."
 )
