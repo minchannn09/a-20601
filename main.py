@@ -215,12 +215,69 @@ fig5 = px.bar(
     text_auto=".2s",  # 막대 위에 축약된 숫자로 관객수 표시 (예: 1.2M)
 )
 
-fig5.update_traces(
-    textposition="outside"  # 텍스트 위치를 막대 외부 상단으로 설정
-)
+fig5.update_traces(textposition="outside")
 
 st.plotly_chart(fig5, use_container_width=True)
 
 st.info(
     "💡 **이 그래프로 알 수 있는 것:** 월별 총 관객 수 규모를 비교하여 영화 시장의 월별 성수기(여름 방학, 명절 등)와 비성수기를 한눈에 직관적으로 파악할 수 있습니다."
+)
+
+st.divider()  # 구역 구분을 위한 구분선
+
+# --------------------------------------------------
+# [그래프 6] 요일별 x 연월 관객수 캘린더 히트맵
+# --------------------------------------------------
+st.header("🗓️ 요일 및 월별 관객 분포 (캘린더 히트맵)")
+
+# 1. 날짜 데이터에서 요일명, 요일 번호, 연월, 날짜 문자열(YYYY-MM-DD) 추출
+heatmap_df = daily_total_df.copy()
+heatmap_df["요일명"] = heatmap_df["기준일자"].dt.day_name()
+heatmap_df["요일번호"] = heatmap_df["기준일자"].dt.dayofweek  # 월:0 ~ 일:6
+heatmap_df["날짜문자열"] = heatmap_df["기준일자"].dt.strftime("%Y-%m-%d")
+
+# 2. 요일 순서를 월요일부터 일요일로 지정하기 위한 설정
+days_order = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+]
+days_kr = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"]
+
+# 3. pivot_table을 활용해 히트맵 행(요일), 열(연월) 형태로 데이터 구조 변환
+# z축(값): 해당일관객수, customdata: 마우스 호버용 yyyy-mm-dd 날짜
+z_matrix = heatmap_df.pivot_table(
+    index="요일명", columns="연월", values="해당일관객수", aggfunc="sum"
+).reindex(days_order)
+
+date_matrix = heatmap_df.pivot_table(
+    index="요일명", columns="연월", values="날짜문자열", aggfunc="first"
+).reindex(days_order)
+
+# 4. Plotly Heatmap 생성
+fig6 = go.Figure(
+    data=go.Heatmap(
+        z=z_matrix.values,
+        x=z_matrix.columns,
+        y=days_kr,  # Y축 레이블을 한글 요일로 표시
+        customdata=date_matrix.values,  # 마우스 올렸을 때 보여줄 데이터 설정
+        hovertemplate="<b>날짜: %{customdata}</b><br>요일: %{y}<br>관객수: %{z:,.0f}명<extra></extra>",
+        colorscale="Reds",  # 관객수가 많을수록 진한 빨간색
+    )
+)
+
+fig6.update_layout(
+    title="월별/요일별 박스오피스 관객수 히트맵",
+    xaxis_title="연-월",
+    yaxis_title="요일",
+)
+
+st.plotly_chart(fig6, use_container_width=True)
+
+st.info(
+    "💡 **이 그래프로 알 수 있는 것:** 각 월별로 어떤 요일에 관객 집중도가 높았는지 파악할 수 있으며, 주말 및 공휴일 영향에 따른 관객 몰림 현상을 한눈에 비교할 수 있습니다."
 )
