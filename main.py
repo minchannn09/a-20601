@@ -4,13 +4,13 @@ import plotly.express as px
 
 # 페이지 기본 설정
 st.set_page_config(
-    page_title="영화 데이터 그래프 - 분포와 관계",
+    page_title="영화 데이터 그래프 도감 2 - 분포와 관계",
     page_icon="🎬",
     layout="wide"
 )
 
 # 앱 제목 설정
-st.title("🎬 영화 데이터 그래프 - 분포와 관계")
+st.title("🎬 영화 데이터 그래프 도감 2 - 분포와 관계")
 st.markdown("---")
 
 # 데이터 로드 및 전처리 함수
@@ -102,6 +102,43 @@ try:
     
     # 하단 구역: 이 그래프로 알 수 있는 것
     st.info("💡 **이 그래프로 알 수 있는 것:** 각 장르 내에서 어떤 영화가 흥행을 주도(관객수 차지)했는지와 장르 전체의 관객 동원력을 시각적으로 비교해 파악할 수 있습니다.")
+
+    st.markdown("---")
+
+    # -------------------------------------------------------------
+    # 3. 총 관객수 분포 (히스토그램)
+    # -------------------------------------------------------------
+    st.markdown("## 3. 총 관객수(total_audi) 분포")
+    
+    # 관객수가 가장 많은 영화 자동 계산
+    max_movie = df.loc[df['total_audi'].idxmax()]
+    max_title = max_movie['movieNm']
+    max_audi = max_movie['total_audi']
+    
+    # Plotly 히스토그램 그래프 생성
+    fig3 = px.histogram(
+        df,
+        x='total_audi',
+        nbins=30,
+        title="영화별 총 관객수 분포 히스토그램",
+        labels={'total_audi': '총 관객수(명)', 'count': '영화 수'},
+        hover_data=['movieNm']
+    )
+    
+    fig3.update_layout(
+        xaxis_title="총 관객수 (명)",
+        yaxis_title="영화 수 (편)",
+        margin=dict(t=50, b=20, l=20, r=20)
+    )
+    
+    # 그래프 출력
+    st.plotly_chart(fig3, use_container_width=True)
+    
+    # 하단 구역: 이 그래프로 알 수 있는 것
+    st.info(
+        f"💡 **이 그래프로 알 수 있는 것:** 대부분의 영화는 관객수 하위 구간(약 100만 명 미만 구간)에 밀집해 있으며, "
+        f"가장 관객이 많은 영화는 **'{max_title}'** (총 {max_audi:,}명)으로 극소수의 흥행 대작이 전체 분포의 오른쪽 긴 꼬리를 형성을 확인할 수 있습니다."
+    )
 
 except Exception as e:
     st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {e}")
