@@ -4,13 +4,13 @@ import plotly.express as px
 
 # 페이지 기본 설정
 st.set_page_config(
-    page_title="영화 데이터 그래프 도감 2 - 분포와 관계",
+    page_title="영화 데이터 그래프 - 분포와 관계",
     page_icon="🎬",
     layout="wide"
 )
 
 # 앱 제목 설정
-st.title("🎬 영화 데이터 그래프 도감 2 - 분포와 관계")
+st.title("🎬 영화 데이터 그래프 - 분포와 관계")
 st.markdown("---")
 
 # 데이터 로드 및 전처리 함수
