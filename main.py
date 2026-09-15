@@ -110,7 +110,7 @@ try:
     # -------------------------------------------------------------
     st.markdown("## 3. 총 관객수(total_audi) 분포")
     
-    # 관객수가 가장 많은 영화 자동 계산
+    # 관객수가 가장 많은 영화 계산
     max_movie = df.loc[df['total_audi'].idxmax()]
     max_title = max_movie['movieNm']
     max_audi = max_movie['total_audi']
@@ -136,9 +136,54 @@ try:
     
     # 하단 구역: 이 그래프로 알 수 있는 것
     st.info(
-        f"💡 **이 그래프로 알 수 있는 것:** 대부분의 영화는 관객수 하위 구간(약 100만 명 미만 구간)에 밀집해 있으며, "
-        f"가장 관객이 많은 영화는 **'{max_title}'** (총 {max_audi:,}명)으로 극소수의 흥행 대작이 전체 분포의 오른쪽 긴 꼬리를 형성을 확인할 수 있습니다."
+        f"💡 **이 그래프로 알 수 있는 것:** 대부분의 영화는 관객수 하위 구간(약 100만 명 미만 구간)에 집중되어 분포하고 있으며, "
+        f"가장 관객이 많은 영화는 **'{max_title}'** (총 {max_audi:,}명)으로 극소수의 흥행 대작이 전체 관객수 분포의 오른쪽 긴 꼬리를 형성함을 보여줍니다."
     )
+
+    st.markdown("---")
+
+    # -------------------------------------------------------------
+    # 4. 개봉일 스크린수와 총 관객수의 관계 (산점도)
+    # -------------------------------------------------------------
+    st.markdown("## 4. 개봉일 스크린수와 총 관객수의 관계 (산점도)")
+    
+    # Plotly 산점도 그래프 생성
+    fig4 = px.scatter(
+        df,
+        x='first_scrn',
+        y='total_audi',
+        color='genre_first',
+        hover_name='movieNm',
+        title="개봉일 스크린수(first_scrn) vs 총 관객수(total_audi)",
+        labels={
+            'first_scrn': '개봉일 스크린수 (개)',
+            'total_audi': '총 관객수 (명)',
+            'genre_first': '장르'
+        },
+        hover_data={
+            'first_scrn': ':,d',
+            'total_audi': ':,d',
+            'genre_first': False
+        }
+    )
+    
+    # 호버(마우스 올림) 시 영화명, 스크린수, 총 관객수 표기
+    fig4.update_traces(
+        hovertemplate="<b>%{hovertext}</b><br>개봉일 스크린수: %{x:,}개<br>총 관객수: %{y:,}명<extra></extra>"
+    )
+    
+    fig4.update_layout(
+        xaxis_title="개봉일 스크린수 (개)",
+        yaxis_title="총 관객수 (명)",
+        margin=dict(t=50, b=20, l=20, r=20),
+        legend_title_text="장르"
+    )
+    
+    # 그래프 출력
+    st.plotly_chart(fig4, use_container_width=True)
+    
+    # 하단 구역: 이 그래프로 알 수 있는 것
+    st.info("💡 **이 그래프로 알 수 있는 것:** 개봉일 스크린수가 많을수록 총 관객수도 증가하는 양의 상관관계를 나타내며, 장르별 선호 스크린 확보 규모와 이에 따른 초기 흥행 스케일의 차이를 한눈에 확인할 수 있습니다.")
 
 except Exception as e:
     st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {e}")
