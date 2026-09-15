@@ -183,7 +183,56 @@ try:
     st.plotly_chart(fig4, use_container_width=True)
     
     # 하단 구역: 이 그래프로 알 수 있는 것
-    st.info("💡 **이 그래프로 알 수 있는 것:** 개봉일 스크린수가 많을수록 총 관객수도 증가하는 양의 상관관계를 나타내며, 장르별 선호 스크린 확보 규모와 이에 따른 초기 흥행 스케일의 차이를 한눈에 확인할 수 있습니다.")
+    st.info("💡 **이 그래프로 알 수 있는 것:** 개봉일 스크린수가 많을수록 총 관객수도 증가하는 비례 경향(양의 상관관계)을 보이며, 장르별 선호 스크린 확보 규모와 관객 수 선점 차이를 확인할 수 있습니다.")
+
+    st.markdown("---")
+
+    # -------------------------------------------------------------
+    # 5. 주요 장르별 총 관객수 박스플롯 (상자 그림)
+    # -------------------------------------------------------------
+    st.markdown("## 5. 영화 10편 이상 주요 장르별 총 관객수 분포 (박스플롯)")
+    
+    # 영화 편수가 10편 이상인 장르만 필터링
+    genre_counts_series = df['genre_first'].value_counts()
+    major_genres = genre_counts_series[genre_counts_series >= 10].index.tolist()
+    df_major = df[df['genre_first'].isin(major_genres)]
+    
+    # Plotly 박스플롯 그래프 생성
+    fig5 = px.box(
+        df_major,
+        x='genre_first',
+        y='total_audi',
+        color='genre_first',
+        hover_name='movieNm',
+        points='outliers',  # 상자 밖으로 튀는 점(이상치) 표기
+        title="주요 장르별(10편 이상) 총 관객수 분포",
+        labels={
+            'genre_first': '장르',
+            'total_audi': '총 관객수 (명)'
+        },
+        hover_data={
+            'total_audi': ':,d',
+            'genre_first': False
+        }
+    )
+    
+    # 마우스 올림(호버) 시 영화명 및 총 관객수 표시
+    fig5.update_traces(
+        hovertemplate="<b>%{hovertext}</b><br>총 관객수: %{y:,}명<extra></extra>"
+    )
+    
+    fig5.update_layout(
+        xaxis_title="장르",
+        yaxis_title="총 관객수 (명)",
+        margin=dict(t=50, b=20, l=20, r=20),
+        legend_title_text="장르"
+    )
+    
+    # 그래프 출력
+    st.plotly_chart(fig5, use_container_width=True)
+    
+    # 하단 구역: 이 그래프로 알 수 있는 것
+    st.info(f"💡 **이 그래프로 알 수 있는 것:** 영화가 10편 이상인 주요 장르({', '.join(major_genres)})의 관객수 분포와 중간값을 비교할 수 있으며, 상자 밖의 점(이상치)에 마우스를 올려 장르별 흥행 대작 영화를 식별할 수 있습니다.")
 
 except Exception as e:
     st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {e}")
