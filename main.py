@@ -4,13 +4,13 @@ import plotly.express as px
 
 # 페이지 기본 설정
 st.set_page_config(
-    page_title="영화 데이터 그래프 도감 2 - 분포와 관계",
+    page_title="영화 데이터 그래프 - 분포와 관계",
     page_icon="🎬",
     layout="wide"
 )
 
 # 앱 제목 설정
-st.title("🎬 영화 데이터 그래프 도감 2 - 분포와 관계")
+st.title("🎬 영화 데이터 그래프 - 분포와 관계")
 st.markdown("---")
 
 # 데이터 로드 및 전처리 함수
@@ -240,7 +240,7 @@ try:
     # -------------------------------------------------------------
     st.markdown("## 6. 스크린수 · 총 관객수 · 첫 주 관객수 버블 차트")
     
-    # Plotly 버블 차트 생성 (4번 산점도 + size 옵션 추가)
+    # Plotly 버블 차트 생성
     fig6 = px.scatter(
         df,
         x='first_scrn',
@@ -248,8 +248,8 @@ try:
         size='first_week_audi',
         color='genre_first',
         hover_name='movieNm',
-        size_max=45,  # 점의 최대 크기 조절
-        title="개봉일 스크린수(x) vs 총 관객수(y) vs 첫 주 관객수(버블 크기)",
+        size_max=45,
+        title="스크린수(x) vs 총 관객수(y) vs 첫 주 관객수(버블 크기)",
         labels={
             'first_scrn': '개봉일 스크린수 (개)',
             'total_audi': '총 관객수 (명)',
@@ -264,7 +264,6 @@ try:
         }
     )
     
-    # 마우스 올림(호버) 시 정보 표기
     fig6.update_traces(
         hovertemplate="<b>%{hovertext}</b><br>개봉일 스크린수: %{x:,}개<br>총 관객수: %{y:,}명<br>첫 주 관객수: %{marker.size:,}명<extra></extra>"
     )
@@ -280,7 +279,36 @@ try:
     st.plotly_chart(fig6, use_container_width=True)
     
     # 하단 구역: 이 그래프로 알 수 있는 것
-    st.info("💡 **이 그래프로 알 수 있는 것:** 스크린수와 총 관객수의 관계뿐 아니라, 버블 크기(첫 주 관객수)를 통해 초반 흥행 동원력이 최종 흥행(총 관객수)에 미치는 파급력을 3차원적 시각으로 함께 분석할 수 있습니다.")
+    st.info("💡 **이 그래프로 알 수 있는 것:** 개봉일 스크린수와 총 관객수의 상관관계에 더해 버블 크기(첫 주 관객수)를 통해 초반 흥행 집객력이 최종 총 관객수 동원에 결정적인 영향을 미치는지 3차원적인 상관성을 시각적으로 파악할 수 있습니다.")
+
+    st.markdown("---")
+
+    # -------------------------------------------------------------
+    # 7. 제작 국가 및 장르별 영화 편수 선버스트 차트
+    # -------------------------------------------------------------
+    st.markdown("## 7. 제작 국가 및 장르별 영화 편수 선버스트")
+    
+    # Plotly 선버스트 그래프 생성 (path: nation -> genre_first)
+    fig7 = px.sunburst(
+        df,
+        path=['nation', 'genre_first'],
+        title="제작 국가 및 장르별 영화 편수 분포 (칸 크기 = 영화 편수)"
+    )
+    
+    # 마우스 올림(호버) 시 정보 표기
+    fig7.update_traces(
+        hovertemplate="<b>%{label}</b><br>영화 편수: %{value}편<extra></extra>"
+    )
+    
+    fig7.update_layout(
+        margin=dict(t=50, b=20, l=20, r=20)
+    )
+    
+    # 그래프 출력
+    st.plotly_chart(fig7, use_container_width=True)
+    
+    # 하단 구역: 이 그래프로 알 수 있는 것
+    st.info("💡 **이 그래프로 알 수 있는 것:** 영화를 제작한 각 국가(내부 링)에서 주력으로 제작하거나 개봉한 핵심 장르(외부 링)의 편수 비율과 계층 구조를 동심원 형태로 한눈에 파악할 수 있습니다.")
 
 except Exception as e:
     st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {e}")
