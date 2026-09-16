@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 
 # 페이지 기본 설정
 st.set_page_config(
@@ -317,16 +319,14 @@ try:
     # -------------------------------------------------------------
     st.markdown("## 8. 첫 주 관객수와 총 관객수의 관계 (선형 추세선)")
     
-    # 결측치 제거 데이터 준비 (추세선 연산용)
-    df_clean8 = df.dropna(subset=['first_week_audi', 'total_audi'])
+    # 결측치 제거 데이터 준비
+    df_clean8 = df.dropna(subset=['first_week_audi', 'total_audi']).copy()
     
-    # Plotly 추세선 산점도 그래프 생성
+    # 기본 산점도 생성
     fig8 = px.scatter(
         df_clean8,
         x='first_week_audi',
         y='total_audi',
-        trendline='ols',  # OLS 선형 추세선 추가
-        trendline_color_override='red',
         hover_name='movieNm',
         title="첫 주 관객수(first_week_audi) vs 총 관객수(total_audi) 추세선 분석",
         labels={
@@ -339,9 +339,31 @@ try:
         }
     )
     
+    # NumPy를 활용해 1차 선형 회귀 직선 계산 (statsmodels 의존성 제거)
+    x_val = df_clean8['first_week_audi'].values
+    y_val = df_clean8['total_audi'].values
+    
+    slope, intercept = np.polyfit(x_val, y_val, 1)
+    
+    # 추세선 X, Y 데이터 생성
+    x_range = np.array([x_val.min(), x_val.max()])
+    y_trend = slope * x_range + intercept
+    
+    # 산점도 점 툴팁 설정
     fig8.update_traces(
-        selector=dict(mode='markers'),
         hovertemplate="<b>%{hovertext}</b><br>첫 주 관객수: %{x:,}명<br>총 관객수: %{y:,}명<extra></extra>"
+    )
+    
+    # 빨간색 추세선 라인 레이어 추가
+    fig8.add_trace(
+        go.Scatter(
+            x=x_range,
+            y=y_trend,
+            mode='lines',
+            name='선형 추세선',
+            line=dict(color='red', width=2),
+            hoverinfo='skip'
+        )
     )
     
     fig8.update_layout(
