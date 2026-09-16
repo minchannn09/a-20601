@@ -4,13 +4,13 @@ import plotly.express as px
 
 # 페이지 기본 설정
 st.set_page_config(
-    page_title="영화 데이터 그래프 - 분포와 관계",
+    page_title="영화 데이터 그래프 도감 2 - 분포와 관계",
     page_icon="🎬",
     layout="wide"
 )
 
 # 앱 제목 설정
-st.title("🎬 영화 데이터 그래프 - 분포와 관계")
+st.title("🎬 영화 데이터 그래프 도감 2 - 분포와 관계")
 st.markdown("---")
 
 # 데이터 로드 및 전처리 함수
@@ -309,6 +309,52 @@ try:
     
     # 하단 구역: 이 그래프로 알 수 있는 것
     st.info("💡 **이 그래프로 알 수 있는 것:** 영화를 제작한 각 국가(내부 링)에서 주력으로 제작하거나 개봉한 핵심 장르(외부 링)의 편수 비율과 계층 구조를 동심원 형태로 한눈에 파악할 수 있습니다.")
+
+    st.markdown("---")
+
+    # -------------------------------------------------------------
+    # 8. 첫 주 관객수와 총 관객수의 상관관계 (추세선 산점도)
+    # -------------------------------------------------------------
+    st.markdown("## 8. 첫 주 관객수와 총 관객수의 관계 (선형 추세선)")
+    
+    # 결측치 제거 데이터 준비 (추세선 연산용)
+    df_clean8 = df.dropna(subset=['first_week_audi', 'total_audi'])
+    
+    # Plotly 추세선 산점도 그래프 생성
+    fig8 = px.scatter(
+        df_clean8,
+        x='first_week_audi',
+        y='total_audi',
+        trendline='ols',  # OLS 선형 추세선 추가
+        trendline_color_override='red',
+        hover_name='movieNm',
+        title="첫 주 관객수(first_week_audi) vs 총 관객수(total_audi) 추세선 분석",
+        labels={
+            'first_week_audi': '첫 주 관객수 (명)',
+            'total_audi': '총 관객수 (명)'
+        },
+        hover_data={
+            'first_week_audi': ':,d',
+            'total_audi': ':,d'
+        }
+    )
+    
+    fig8.update_traces(
+        selector=dict(mode='markers'),
+        hovertemplate="<b>%{hovertext}</b><br>첫 주 관객수: %{x:,}명<br>총 관객수: %{y:,}명<extra></extra>"
+    )
+    
+    fig8.update_layout(
+        xaxis_title="첫 주 관객수 (명)",
+        yaxis_title="총 관객수 (명)",
+        margin=dict(t=50, b=20, l=20, r=20)
+    )
+    
+    # 그래프 출력
+    st.plotly_chart(fig8, use_container_width=True)
+    
+    # 하단 구역: 이 그래프로 알 수 있는 것
+    st.info("💡 **이 그래프로 알 수 있는 것:** 개봉 첫 주 관객수가 많을수록 최종 총 관객수도 함께 증가하는 매우 강한 선형 비례 상관관계를 보여주며, 빨간색 추세선을 통해 첫 주 실적만으로 최종 흥행 결과를 매우 높은 확률로 예측할 수 있음을 입증합니다.")
 
 except Exception as e:
     st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {e}")
