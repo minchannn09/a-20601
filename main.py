@@ -192,7 +192,7 @@ try:
     # -------------------------------------------------------------
     st.markdown("## 5. 영화 10편 이상 주요 장르별 총 관객수 분포 (박스플롯)")
     
-    # 영화 편수가 10편 이상인 장르만 필터링
+    # 영화 편수가 10편 이상인 장르 필터링
     genre_counts_series = df['genre_first'].value_counts()
     major_genres = genre_counts_series[genre_counts_series >= 10].index.tolist()
     df_major = df[df['genre_first'].isin(major_genres)]
@@ -204,8 +204,8 @@ try:
         y='total_audi',
         color='genre_first',
         hover_name='movieNm',
-        points='outliers',  # 상자 밖으로 튀는 점(이상치) 표기
-        title="주요 장르별(10편 이상) 총 관객수 분포",
+        points='outliers',  # 상자 밖의 아웃라이어 점 표시
+        title="주요 장르별(10편 이상) 총 관객수 분포 (이상치 관측)",
         labels={
             'genre_first': '장르',
             'total_audi': '총 관객수 (명)'
@@ -216,7 +216,6 @@ try:
         }
     )
     
-    # 마우스 올림(호버) 시 영화명 및 총 관객수 표시
     fig5.update_traces(
         hovertemplate="<b>%{hovertext}</b><br>총 관객수: %{y:,}명<extra></extra>"
     )
@@ -232,7 +231,56 @@ try:
     st.plotly_chart(fig5, use_container_width=True)
     
     # 하단 구역: 이 그래프로 알 수 있는 것
-    st.info(f"💡 **이 그래프로 알 수 있는 것:** 영화가 10편 이상인 주요 장르({', '.join(major_genres)})의 관객수 분포와 중간값을 비교할 수 있으며, 상자 밖의 점(이상치)에 마우스를 올려 장르별 흥행 대작 영화를 식별할 수 있습니다.")
+    st.info(f"💡 **이 그래프로 알 수 있는 것:** 영화 편수가 10편 이상인 주요 장르({', '.join(major_genres)})의 관객수 중간값과 편차를 비교할 수 있으며, 상자 밖으로 튀어나온 이상치(outlier) 점들을 통해 해당 장르에서 압도적인 흥행 성과를 거둔 대표 대작들을 쉽게 식별할 수 있습니다.")
+
+    st.markdown("---")
+
+    # -------------------------------------------------------------
+    # 6. 개봉일 스크린수, 총 관객수 및 첫 주 관객수의 관계 (버블 차트)
+    # -------------------------------------------------------------
+    st.markdown("## 6. 스크린수 · 총 관객수 · 첫 주 관객수 버블 차트")
+    
+    # Plotly 버블 차트 생성 (4번 산점도 + size 옵션 추가)
+    fig6 = px.scatter(
+        df,
+        x='first_scrn',
+        y='total_audi',
+        size='first_week_audi',
+        color='genre_first',
+        hover_name='movieNm',
+        size_max=45,  # 점의 최대 크기 조절
+        title="개봉일 스크린수(x) vs 총 관객수(y) vs 첫 주 관객수(버블 크기)",
+        labels={
+            'first_scrn': '개봉일 스크린수 (개)',
+            'total_audi': '총 관객수 (명)',
+            'first_week_audi': '첫 주 관객수 (명)',
+            'genre_first': '장르'
+        },
+        hover_data={
+            'first_scrn': ':,d',
+            'total_audi': ':,d',
+            'first_week_audi': ':,d',
+            'genre_first': False
+        }
+    )
+    
+    # 마우스 올림(호버) 시 정보 표기
+    fig6.update_traces(
+        hovertemplate="<b>%{hovertext}</b><br>개봉일 스크린수: %{x:,}개<br>총 관객수: %{y:,}명<br>첫 주 관객수: %{marker.size:,}명<extra></extra>"
+    )
+    
+    fig6.update_layout(
+        xaxis_title="개봉일 스크린수 (개)",
+        yaxis_title="총 관객수 (명)",
+        margin=dict(t=50, b=20, l=20, r=20),
+        legend_title_text="장르"
+    )
+    
+    # 그래프 출력
+    st.plotly_chart(fig6, use_container_width=True)
+    
+    # 하단 구역: 이 그래프로 알 수 있는 것
+    st.info("💡 **이 그래프로 알 수 있는 것:** 스크린수와 총 관객수의 관계뿐 아니라, 버블 크기(첫 주 관객수)를 통해 초반 흥행 동원력이 최종 흥행(총 관객수)에 미치는 파급력을 3차원적 시각으로 함께 분석할 수 있습니다.")
 
 except Exception as e:
     st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {e}")
