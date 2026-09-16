@@ -4,13 +4,13 @@ import plotly.express as px
 
 # 페이지 기본 설정
 st.set_page_config(
-    page_title="영화 데이터 그래프 - 분포와 관계",
+    page_title="영화 데이터 그래프 도감 2 - 분포와 관계",
     page_icon="🎬",
     layout="wide"
 )
 
 # 앱 제목 설정
-st.title("🎬 영화 데이터 그래프 - 분포와 관계")
+st.title("🎬 영화 데이터 그래프 도감 2 - 분포와 관계")
 st.markdown("---")
 
 # 데이터 로드 및 전처리 함수
@@ -313,9 +313,9 @@ try:
     st.markdown("---")
 
     # -------------------------------------------------------------
-    # 8. 첫 주 관객수와 총 관객수의 상관관계 (산점도)
+    # 8. 첫 주 관객수와 총 관객수 사이에는 어떤 관계가 있을까?
     # -------------------------------------------------------------
-    st.markdown("## 8. 첫 주 관객수와 총 관객수의 관계 (산점도)")
+    st.markdown("## 8. 첫 주 관객수와 총 관객수 사이에는 어떤 관계가 있을까?")
     
     # Plotly 산점도 그래프 생성
     fig8 = px.scatter(
@@ -323,7 +323,7 @@ try:
         x='first_week_audi',
         y='total_audi',
         hover_name='movieNm',
-        title="첫 주 관객수(first_week_audi) vs 총 관객수(total_audi)",
+        title="첫 주 관객수(first_week_audi)와 총 관객수(total_audi)의 관계 분석",
         labels={
             'first_week_audi': '첫 주 관객수 (명)',
             'total_audi': '총 관객수 (명)'
@@ -347,8 +347,8 @@ try:
     # 그래프 출력
     st.plotly_chart(fig8, use_container_width=True)
     
-    # 하단 구역: 이 그래프로 알 수 있는 것
-    st.info("💡 **이 그래프로 알 수 있는 것:** 개봉 첫 주 관객수가 많을수록 최종 총 관객수도 함께 증가하는 비례 경향(양의 상관관계)을 한눈에 확인할 수 있습니다.")
+    # 하단 구역: 질문에 대한 답변 형태로 표시
+    st.info("💡 **질문에 대한 답:** 개봉 첫 주 관객수가 많은 영화일수록 최종 총 관객수도 높게 나타나는 **강한 양의 상관관계(비례 관계)**를 보입니다. 즉, 초반 흥행 성공이 최종 관객수 동원에 결정적인 영향을 준다는 것을 보여줍니다.")
 
 except Exception as e:
     st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {e}")
