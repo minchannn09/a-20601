@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import plotly.express as px
-import plotly.graph_objects as go
 
 # 페이지 기본 설정
 st.set_page_config(
@@ -315,20 +313,17 @@ try:
     st.markdown("---")
 
     # -------------------------------------------------------------
-    # 8. 첫 주 관객수와 총 관객수의 상관관계 (추세선 산점도)
+    # 8. 첫 주 관객수와 총 관객수의 상관관계 (산점도)
     # -------------------------------------------------------------
-    st.markdown("## 8. 첫 주 관객수와 총 관객수의 관계 (선형 추세선)")
+    st.markdown("## 8. 첫 주 관객수와 총 관객수의 관계 (산점도)")
     
-    # 결측치 제거 데이터 준비
-    df_clean8 = df.dropna(subset=['first_week_audi', 'total_audi']).copy()
-    
-    # 기본 산점도 생성
+    # Plotly 산점도 그래프 생성
     fig8 = px.scatter(
-        df_clean8,
+        df,
         x='first_week_audi',
         y='total_audi',
         hover_name='movieNm',
-        title="첫 주 관객수(first_week_audi) vs 총 관객수(total_audi) 추세선 분석",
+        title="첫 주 관객수(first_week_audi) vs 총 관객수(total_audi)",
         labels={
             'first_week_audi': '첫 주 관객수 (명)',
             'total_audi': '총 관객수 (명)'
@@ -339,31 +334,8 @@ try:
         }
     )
     
-    # NumPy를 활용해 1차 선형 회귀 직선 계산 (statsmodels 의존성 제거)
-    x_val = df_clean8['first_week_audi'].values
-    y_val = df_clean8['total_audi'].values
-    
-    slope, intercept = np.polyfit(x_val, y_val, 1)
-    
-    # 추세선 X, Y 데이터 생성
-    x_range = np.array([x_val.min(), x_val.max()])
-    y_trend = slope * x_range + intercept
-    
-    # 산점도 점 툴팁 설정
     fig8.update_traces(
         hovertemplate="<b>%{hovertext}</b><br>첫 주 관객수: %{x:,}명<br>총 관객수: %{y:,}명<extra></extra>"
-    )
-    
-    # 빨간색 추세선 라인 레이어 추가
-    fig8.add_trace(
-        go.Scatter(
-            x=x_range,
-            y=y_trend,
-            mode='lines',
-            name='선형 추세선',
-            line=dict(color='red', width=2),
-            hoverinfo='skip'
-        )
     )
     
     fig8.update_layout(
@@ -376,7 +348,7 @@ try:
     st.plotly_chart(fig8, use_container_width=True)
     
     # 하단 구역: 이 그래프로 알 수 있는 것
-    st.info("💡 **이 그래프로 알 수 있는 것:** 개봉 첫 주 관객수가 많을수록 최종 총 관객수도 함께 증가하는 매우 강한 선형 비례 상관관계를 보여주며, 빨간색 추세선을 통해 첫 주 실적만으로 최종 흥행 결과를 매우 높은 확률로 예측할 수 있음을 입증합니다.")
+    st.info("💡 **이 그래프로 알 수 있는 것:** 개봉 첫 주 관객수가 많을수록 최종 총 관객수도 함께 증가하는 비례 경향(양의 상관관계)을 한눈에 확인할 수 있습니다.")
 
 except Exception as e:
     st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {e}")
